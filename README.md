@@ -86,10 +86,39 @@ Las pruebas de `VeterinariaTest` cubren los supuestos S1 a S4, el registro y la 
 
 ## 7. Limitaciones conocidas
 
-- Los datos viven en memoria: al cerrar la app se pierden. No hay base de datos.
-- Las operaciones de la veterinaria son síncronas y en memoria. Las Coroutines se usan para lanzar las acciones desde el ViewModel; no hay trabajo en segundo plano real.
-- No hay pruebas instrumentadas (`androidTest`) del flujo de pantalla.
+### 7.1 Los datos están en memoria
+
+Clientes, mascotas, consultas y pedidos existen solo mientras la app está abierta, en la memoria del teléfono. Al cerrar la app (o al quitarla de recientes y el sistema la detiene), todo vuelve a los datos de ejemplo de `DatosIniciales`.
+
+- Girar la pantalla **no** los pierde: el `VeterinariaViewModel` los conserva.
+- Cerrar la app **sí** los pierde.
+
+**Por qué:** la actividad no pide persistencia, y la base de S4 tampoco la tenía. **Qué implicaría:** una base de datos local (por ejemplo Room) y un repositorio con funciones `suspend`. Ese cambio es el que daría sentido real a las Coroutines (ver 7.2).
+
+### 7.2 Las Coroutines no hacen trabajo asíncrono real
+
+La actividad pide Kotlin Coroutines "para el manejo eficiente de operaciones asincrónicas". En esta versión esa parte no se cumple de verdad:
+
+- Registrar un cliente, confirmar un pedido o agregar una consulta son operaciones en memoria, que tardan microsegundos. No hay espera ni acceso a disco ni a red.
+- Las Coroutines solo envuelven cada acción con `viewModelScope.launch`. La dependencia está, pero no resuelve ningún problema concreto.
+
+Esto es una **contradicción con el requerimiento**. Se resolvería con la persistencia de 7.1: las operaciones pasarían a ser `suspend` y correrían en `Dispatchers.IO`, sin bloquear la pantalla.
+
+### 7.3 No hay pruebas instrumentadas de la pantalla
+
+Hay dos tipos de pruebas automáticas en Android:
+
+| Tipo | Dónde corre | Qué verifica | Estado en este proyecto |
+|---|---|---|---|
+| **Unitarias** (`testDebugUnitTest`) | En la computadora, sin emulador | Reglas de negocio: IVA, stock, validaciones, supuestos S1 a S4 | 19 pruebas, en verde |
+| **Instrumentadas** (`androidTest`) | Dentro de un emulador o teléfono real | La pantalla: escribir en los campos, presionar botones y verificar el texto que aparece (con `createComposeRule`) | **No hay.** Solo está la plantilla `ExampleInstrumentedTest`, que no prueba la app |
+
+**Consecuencia:** la pantalla (formulario de pedido, resumen que se actualiza, botón de consulta) se verifica solo a mano, en el emulador. Si un cambio rompe un botón o deja de mostrar el resumen, ninguna prueba automática lo detecta.
+
+### 7.4 Otras limitaciones
+
 - La cantidad máxima por producto en la pantalla es 10.
+- Los pedidos pendientes (sin stock) no se guardan; solo se informa el faltante en pantalla.
 
 ## 8. Evidencias
 

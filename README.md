@@ -2,7 +2,7 @@
 
 **Actividad:** Semana 5 · Actividad formativa individual · Desarrollo App Móviles I (PMY2201)
 **Estudiante:** Francisco Parra
-**Estado:** entrega en preparación. Las evidencias E1 a E6 están pendientes (sección 8).
+**Estado:** entrega formativa. Ejecutada y verificada en emulador (Pixel 4, API 37). Pendiente: retroalimentación docente de la semana 4.
 
 Aplicación Android en Kotlin para la gestión de una veterinaria: dueños (clientes), mascotas, productos o servicios, pedidos y consultas. Organizada en módulos Gradle, con interfaz en Jetpack Compose, ViewModel y LiveData. La pantalla inicial muestra un resumen que se actualiza al registrar clientes y pedidos.
 
@@ -31,8 +31,8 @@ Además, el IVA es del 19 % sobre el subtotal, redondeado al peso.
 
 ```
 PizzeriaApp/
-├── app/          Entrada: MainActivity, recurso de bienvenida
-├── ui/           Pantalla Compose (PantallaVeterinaria) y VeterinariaViewModel, tema
+├── app/          Entrada: MainActivity (conecta ViewModel y pantalla), recurso de bienvenida
+├── ui/           Pantalla Compose (PantallaVeterinaria, sin estado propio), VeterinariaViewModel, tema
 ├── datos/        Dominio: modelo (Cliente, Mascota, Producto, Pedido, Consulta…), servicio Veterinaria, DatosIniciales
 └── utilidades/   Funciones generales: validaciones, formato de montos, Resultado (manejo de errores)
 ```
@@ -41,13 +41,17 @@ PizzeriaApp/
 
 **Decisión de diseño:** en la semana 4, `utils` dependía de `modelo` (cálculos y reflexión sobre `Producto`) y `modelo` dependía de `utils`. Eso impedía separar `utilidades` en un módulo propio. En esta entrega, `utilidades` solo contiene funciones sin dependencias del dominio, y la lógica que depende del dominio vive en `datos`.
 
-**Estado:** la `Veterinaria` vive en `VeterinariaViewModel`, no en `remember`, por lo que sobrevive a la rotación de pantalla. La UI observa un `LiveData<EstadoVeterinaria>`.
+**Flujo de datos:**
+- `VeterinariaViewModel` contiene la `Veterinaria` (no en `remember`), por lo que sobrevive a la rotación de pantalla. Publica un `LiveData<EstadoVeterinaria>`.
+- `MainActivity` crea el ViewModel, observa el LiveData y pasa a `PantallaVeterinaria` el estado y las acciones del usuario (confirmar pedido, registrar consulta).
+- `PantallaVeterinaria` no tiene estado de negocio: solo muestra lo que recibe y reporta las acciones.
 
 ## 4. Gradle
 
 - `settings.gradle.kts` declara `:app`, `:ui`, `:datos` y `:utilidades`.
 - `gradle/libs.versions.toml` agrega: ViewModel de Compose, LiveData, `runtime-livedata` de Compose y Kotlin Coroutines.
 - Compose se gestiona con el BOM, por lo que no se fijan versiones individuales de Compose.
+- `app` declara directamente `datos` y LiveData porque `MainActivity` los usa; las dependencias de `implementation` de `ui` no se heredan.
 
 ## 5. Pruebas
 
@@ -68,21 +72,31 @@ Las pruebas de `VeterinariaTest` cubren los supuestos S1 a S4, el registro y la 
 
 **Compilación:** `gradlew assembleDebug` genera `app-debug.apk` sin errores.
 
-**Pendiente de verificar:** la ejecución en el emulador (sección 8).
+**Ejecución en emulador:** la app se instaló y abrió en un Pixel 4 con API 37, sin errores en el log. Se verificó el resumen inicial, su actualización al registrar un cliente nuevo con un pedido despachado, y el registro de una consulta (sección 8).
 
-## 6. Cumplimiento de la actividad
+## 6. Cumplimiento de la actividad y de la rúbrica
 
-| Requisito | Dónde se cumple |
+| Requisito de la actividad | Dónde se cumple | Evidencia |
+|---|---|---|
+| Paso 1 · Módulos datos, UI y utilidades | Sección 3 | E1 |
+| Paso 2 · Gradle con Compose, ViewModel, LiveData y Coroutines | `gradle/libs.versions.toml`, `ui/build.gradle.kts`, `VeterinariaViewModel` | E2 |
+| Paso 3 · Pantalla inicial con Compose | `ui/PantallaVeterinaria.kt` | E3 |
+| Paso 4 · MainActivity conecta lógica y UI | `app/MainActivity.kt` | E3, E4 |
+| Paso 5 · Resumen con clientes, pedidos y último cliente | Bloque "Resumen"; reglas en sección 2 | E3, E4 |
+| Paso 6 · Pruebas en AVD | Sección 8 | E3, E4, E6 |
+| Paso 7 · Entrega con capturas | Sección 8 y carpeta `evidencias/` | Todas |
+
+**Rúbrica de la pauta formativa:**
+
+| Criterio | Cómo se cubre |
 |---|---|
-| Paso 1 · Módulos datos, UI y utilidades | Sección 3 |
-| Paso 2 · Gradle con Compose, ViewModel, LiveData y Coroutines | `gradle/libs.versions.toml`, `ui/build.gradle.kts`, `VeterinariaViewModel` |
-| Paso 3 · Pantalla inicial con Compose | `ui/PantallaVeterinaria.kt` |
-| Paso 4 · MainActivity conecta lógica y UI | `app/MainActivity.kt` |
-| Paso 5 · Resumen con clientes, pedidos y último cliente | Bloque "Resumen" de la pantalla; reglas en sección 2 |
-| Paso 6 · Pruebas en AVD | Sección 8 (E3 y E4) |
-| Paso 7 · Entrega con capturas | Sección 8 |
-
-**Mascotas, dueños y consultas:** la pantalla muestra las listas de dueños, mascotas y consultas. Cada mascota tiene un botón "Registrar consulta", que agrega una consulta y actualiza la lista.
+| Reestructuración y modularización | Cuatro módulos con responsabilidades separadas, sin ciclos (sección 3) |
+| Configuración de Gradle | Dependencias de Compose, ViewModel, LiveData y Coroutines en el catálogo y en los módulos que las usan (sección 4) |
+| Diseño de interfaz | Compose con Material 3: tarjeta de resumen, formulario, listas y botones con estados habilitado y deshabilitado |
+| Conexión lógica-UI | `MainActivity` observa el ViewModel y reenvía las acciones; la pantalla no tiene lógica de negocio (sección 3) |
+| Mensaje de resumen | Clientes, pedidos y último cliente, actualizados al registrar datos (E3, E4) |
+| Pruebas | Ejecución sin errores en el emulador (E3 a E6) y 19 pruebas unitarias en verde (E5) |
+| Entrega | Este README, capturas y registros en `evidencias/`, y el proyecto en el repositorio |
 
 ## 7. Limitaciones conocidas
 
@@ -113,26 +127,31 @@ Hay dos tipos de pruebas automáticas en Android:
 | **Unitarias** (`testDebugUnitTest`) | En la computadora, sin emulador | Reglas de negocio: IVA, stock, validaciones, supuestos S1 a S4 | 19 pruebas, en verde |
 | **Instrumentadas** (`androidTest`) | Dentro de un emulador o teléfono real | La pantalla: escribir en los campos, presionar botones y verificar el texto que aparece (con `createComposeRule`) | **No hay.** Solo está la plantilla `ExampleInstrumentedTest`, que no prueba la app |
 
-**Consecuencia:** la pantalla (formulario de pedido, resumen que se actualiza, botón de consulta) se verifica solo a mano, en el emulador. Si un cambio rompe un botón o deja de mostrar el resumen, ninguna prueba automática lo detecta.
+**Consecuencia:** la pantalla se verificó a mano en el emulador (sección 8). Si un cambio rompe un botón o deja de mostrar el resumen, ninguna prueba automática lo detecta.
+
+La guía de S5 y la pauta no exigen pruebas instrumentadas: el Paso 6 pide ejecutar la app en el emulador y verificar la integración y la actualización de datos, y eso es lo que se documenta en la sección 8.
 
 ### 7.4 Otras limitaciones
 
 - La cantidad máxima por producto en la pantalla es 10.
 - Los pedidos pendientes (sin stock) no se guardan; solo se informa el faltante en pantalla.
+- Las capturas se tomaron con `adb` sobre el emulador. E1 y E2 son registros generados desde el proyecto, no capturas de Android Studio (sección 8).
 
 ## 8. Evidencias
 
-Las capturas se guardan en `evidencias/`. Todavía no están tomadas.
+Ejecutadas en emulador **Pixel 4, API 37** (AVD `Pixel_4`), con el APK de depuración instalado con `adb install`.
 
-| # | Archivo | Qué debe mostrar |
-|---|---|---|
-| E1 | `evidencias/E1_estructura_modular.png` | Project view de Android Studio con los cuatro módulos y `settings.gradle.kts` |
-| E2 | `evidencias/E2_gradle_sync.png` | Sincronización de Gradle sin errores |
-| E3 | `evidencias/E3_estado_inicial.png` | Pantalla en el emulador con el resumen inicial: 2 clientes, 3 pedidos, último cliente María López |
-| E4 | `evidencias/E4_resumen_actualizado.png` | Después de registrar un cliente nuevo y un pedido despachado: los contadores cambian sin reiniciar la app |
-| E5 | `evidencias/E5_pruebas.png` | `gradlew testDebugUnitTest` con 19 pruebas en verde |
-| E6 | `evidencias/E6_mascotas_duenos_consultas.png` | Listas de dueños, mascotas y consultas en la pantalla, con una consulta registrada |
+| # | Archivo | Qué muestra | Estado |
+|---|---|---|---|
+| E1 | `evidencias/E1_estructura_modular.txt` | Módulos de `settings.gradle.kts` y archivos fuente de cada módulo | Generado desde el proyecto. No es captura de Android Studio |
+| E2 | `evidencias/E2_gradle_build.txt` | Resultado de `gradlew testDebugUnitTest assembleDebug` | `BUILD SUCCESSFUL`. Las tareas ya estaban actualizadas, así que el log es corto |
+| E3 | `evidencias/E3_estado_inicial.png` | Pantalla inicial en el emulador: 2 clientes, 3 pedidos, último cliente María López | Captura del emulador |
+| E4 | `evidencias/E4_resumen_actualizado.png` | Tras registrar a Pedro Soto con un pedido despachado: 3 clientes, 4 pedidos, último cliente Pedro Soto, sin reiniciar la app | Captura del emulador |
+| E5 | `evidencias/E5_pruebas.txt` | Reporte de las 19 pruebas unitarias, todas en verde | Generado desde los reportes XML |
+| E6 | `evidencias/E6_mascotas_duenos_consultas.png` | Listas de dueños (3), mascotas (2) y consultas (2), con la consulta nueva de Michi al final | Captura del emulador |
+
+Para E4 y E6 se usaron entradas reales en la app: nombre, correo, teléfono y dirección de un cliente nuevo, una unidad de consulta general, y el botón "Registrar consulta" de Michi.
 
 ## 9. Retroalimentación docente
 
-La retroalimentación docente de la semana 4 aún no se ha recibido. Si cambia algo de la base técnica, se incorporará en una revisión posterior de esta entrega.
+La retroalimentación docente de la semana 4 aún no se ha recibido. Si cambia algo de la base técnica, se incorporará en una revisión posterior de esta entrega. Las recomendaciones para la siguiente evaluación sumativa se incorporarán cuando estén disponibles.

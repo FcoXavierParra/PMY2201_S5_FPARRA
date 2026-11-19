@@ -25,21 +25,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.livedata.observeAsState
+import com.example.pizzeriaapp.modelo.Mascota
 import com.example.pizzeriaapp.modelo.Producto
 import com.example.pizzeriaapp.utils.formatearPesos
 import com.example.pizzeriaapp.utils.formatearTelefono
 import com.example.pizzeriaapp.utils.validarCorreo
 
+// Pantalla sin estado propio: recibe lo que debe mostrar y reporta las acciones del usuario.
+// La conexión con el ViewModel la hace MainActivity.
 @Composable
 fun PantallaVeterinaria(
     encabezado: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: VeterinariaViewModel = viewModel()
+    estado: EstadoVeterinaria,
+    onConfirmarPedido: (nombre: String, correo: String, telefono: String, direccion: String, cantidades: Map<Producto, Int>) -> Unit,
+    onRegistrarConsulta: (Mascota) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val estado: EstadoVeterinaria = viewModel.estado.observeAsState().value ?: return
-
     var nombre by rememberSaveable { mutableStateOf("") }
     var correo by rememberSaveable { mutableStateOf("") }
     var telefono by rememberSaveable { mutableStateOf("") }
@@ -91,7 +92,7 @@ fun PantallaVeterinaria(
             Column {
                 Button(
                     onClick = {
-                        viewModel.confirmarPedido(nombre, correo, telefono, direccion, cantidades.toMap())
+                        onConfirmarPedido(nombre, correo, telefono, direccion, cantidades.toMap())
                     },
                     enabled = formularioCompleto && hayProductos,
                     modifier = Modifier.fillMaxWidth()
@@ -109,7 +110,7 @@ fun PantallaVeterinaria(
         items(estado.mascotas, key = { "${it.nombre}-${it.dueno.correo}" }) { mascota ->
             Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Text("${mascota.nombre} (${mascota.especie}) · dueño: ${mascota.dueno.nombre}", modifier = Modifier.padding(end = 8.dp))
-                OutlinedButton(onClick = { viewModel.registrarConsulta(mascota, "Control de rutina") }) {
+                OutlinedButton(onClick = { onRegistrarConsulta(mascota) }) {
                     Text("Registrar consulta")
                 }
             }

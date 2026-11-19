@@ -40,6 +40,10 @@ android {
 dependencies {
     // Módulo de UI: pantallas Compose y ViewModel
     implementation(project(":ui"))
+    // MainActivity usa el modelo de datos y observa el LiveData del ViewModel
+    implementation(project(":datos"))
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.compose.runtime.livedata)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

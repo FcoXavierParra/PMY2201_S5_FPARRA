@@ -1,0 +1,4 @@
+E5 · Pruebas unitarias (testDebugUnitTest) — resultado desde los reportes XML
+[utilidades] <testsuite name="com.example.pizzeriaapp.utils.FormatoTest" tests="1" skipped="0" failures="0" errors="0"
+[utilidades] <testsuite name="com.example.pizzeriaapp.utils.ValidacionesTest" tests="5" skipped="0" failures="0" errors="0"
+[datos] <testsuite name="com.example.pizzeriaapp.VeterinariaTest" tests="13" skipped="0" failures="0" errors="0"

@@ -1,0 +1,40 @@
+E1 · Estructura modular (generado desde el repositorio)
+
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+include(":app")
+include(":ui")
+include(":datos")
+include(":utilidades")
+
+[app]
+  app/src/androidTest/java/com/example/pizzeriaapp/ExampleInstrumentedTest.kt
+  app/src/main/java/com/example/pizzeriaapp/MainActivity.kt
+[ui]
+  ui/src/main/java/com/example/pizzeriaapp/ui/PantallaVeterinaria.kt
+  ui/src/main/java/com/example/pizzeriaapp/ui/theme/Color.kt
+  ui/src/main/java/com/example/pizzeriaapp/ui/theme/Theme.kt
+  ui/src/main/java/com/example/pizzeriaapp/ui/theme/Type.kt
+  ui/src/main/java/com/example/pizzeriaapp/ui/VeterinariaViewModel.kt
+[datos]
+  datos/src/main/java/com/example/pizzeriaapp/datos/DatosIniciales.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Calculos.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Categoria.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Cliente.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Consulta.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/EstadoPedido.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Mascota.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Pedido.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Producto.kt
+  datos/src/main/java/com/example/pizzeriaapp/modelo/Registro.kt
+  datos/src/main/java/com/example/pizzeriaapp/servicio/ResultadoPedido.kt
+  datos/src/main/java/com/example/pizzeriaapp/servicio/ResultadoRegistro.kt
+  datos/src/main/java/com/example/pizzeriaapp/servicio/Veterinaria.kt
+  datos/src/test/java/com/example/pizzeriaapp/VeterinariaTest.kt
+[utilidades]
+  utilidades/src/main/java/com/example/pizzeriaapp/utils/Formato.kt
+  utilidades/src/main/java/com/example/pizzeriaapp/utils/Resultado.kt
+  utilidades/src/main/java/com/example/pizzeriaapp/utils/Validaciones.kt
+  utilidades/src/test/java/com/example/pizzeriaapp/utils/FormatoTest.kt
+  utilidades/src/test/java/com/example/pizzeriaapp/utils/ValidacionesTest.kt

@@ -1,99 +1,109 @@
-# PizzeriaApp – Configurando Android Studio
+# Veterinaria · Integrando Kotlin en Android Studio
 
-**Actividad:** Semana 4 · Actividad formativa · Desarrollo App Móviles I (PMY2201)
+**Actividad:** Semana 5 · Actividad formativa individual · Desarrollo App Móviles I (PMY2201)
+**Estudiante:** Francisco Parra
+**Estado:** entrega en preparación. Las evidencias E1 a E6 están pendientes (sección 8).
 
-Proyecto Android creado en Android Studio con la plantilla *Empty Activity* (Jetpack Compose) y Kotlin. La lógica de la pizzería desarrollada en las semanas 1 a 3 se integró al proyecto organizada en paquetes. La pantalla principal muestra el mensaje **"Bienvenidos a la mejor pizzería de la ciudad"**, el menú, el cálculo del pedido y su despacho.
+Aplicación Android en Kotlin para la gestión de una veterinaria: dueños (clientes), mascotas, productos o servicios, pedidos y consultas. Organizada en módulos Gradle, con interfaz en Jetpack Compose, ViewModel y LiveData. La pantalla inicial muestra un resumen que se actualiza al registrar clientes y pedidos.
 
-## Entorno
+---
 
-| Elemento | Versión |
-|---|---|
-| Android Studio | Rabbit 2 · 2026.2.2 Patch 1 (instalación Standard) |
-| Android SDK | Platform 37 (Android 17), Build-Tools 36, Platform-Tools 37.0.1, Emulator 37.2.13 |
-| Gradle / Android Gradle Plugin | 9.6.0 / 9.5.1 (Kotlin 2.2.10) |
-| Proyecto | `PizzeriaApp`, paquete `com.example.pizzeriaapp`, `compileSdk`/`targetSdk` 37, **`minSdk` 23** |
-| Dispositivo virtual (AVD) | Pixel 4 · imagen Google Play x86_64 API 37 · aceleración WHPX |
+## 1. Caso y base de trabajo
 
-### Sobre el SDK mínimo (API 21 → API 23)
+- **Caso de negocio:** gestión de los procesos de una veterinaria, según la descripción de la actividad de S5.
+- **Base técnica:** se reutiliza la arquitectura y la base técnica de la semana 4 (`PizzeriaApp`): paquetes por capa, `Registro` sin duplicados, validaciones de correo y teléfono, formato de montos, Compose, Gradle con catálogo de versiones y pruebas unitarias. Las entidades y reglas de negocio de la pizzería se adaptan al dominio veterinario; no se reconstruye la app desde cero.
+- **Entregables previos:** no se consideraron. S4 es la base más reciente y completa de estructura.
 
-El asistente de Android Studio Rabbit 2 ya no ofrece API 21: la lista de *Minimum SDK* parte en API 23 (ver `evidencias/02_nuevo_proyecto.png`), porque las versiones actuales de Jetpack Compose y AndroidX exigen API 23 o superior. Si se fuerza `minSdk = 21`, el build falla al unir los manifiestos de esas librerías:
+## 2. Supuestos de negocio
 
-```
-Manifest merger failed : uses-sdk:minSdkVersion 21 cannot be smaller than version 23
-declared in library [androidx.compose.material:material-android:1.10.4]
-```
+Estos supuestos definen cómo se calcula el resumen. Están implementados en `datos` y probados.
 
- Por eso se eligió **API 23**, el mínimo disponible, que cumple con "API 21 (Android 5.0) o superior" de las instrucciones.
-
-Como `java.time` (usado para las fechas del pedido y el periodo de la promoción) existe recién desde API 26, el proyecto activa *core library desugaring* para que funcione también en API 23 a 25.
-
-## Cómo ejecutarlo
-
-1. Android Studio → **Open** → carpeta del proyecto. Esperar el *Gradle sync*.
-2. **Device Manager** → iniciar el AVD Pixel 4.
-3. Elegir la configuración **app** y presionar **Run ▶**.
-
-Pruebas unitarias (lógica de negocio, sin emulador): clic derecho sobre `app/src/test` → **Run 'Tests in pizzeriaapp'**, o en terminal `gradlew testDebugUnitTest`.
-
-## Estructura
-
-```
-app/src/main/java/com/example/pizzeriaapp/
-├── MainActivity.kt         Activity principal y función Greeting (mensaje de bienvenida)
-├── modelo/                 Usuario, Cliente, Repartidor, Producto, Pizza, PizzaEspecial, Bebida,
-│                           IngredienteExtra, Combo, Pedido, Inventario, Registro, estados y @Promocionable
-├── servicio/               Pizzeria (reglas del negocio), ResultadoRegistro, ResultadoPedido
-├── datos/                  DatosIniciales: catálogo, stock, repartidores, clientes y pedidos previos
-├── utils/                  Validaciones (Regex), Calculos (rangos, descuentos, IVA), Reflexion, Formato
-└── ui/                     PantallaPizzeria (Compose) y theme/ de la plantilla
-app/src/main/res/values/strings.xml   texto de bienvenida (mensaje_bienvenida)
-app/src/test/java/com/example/pizzeriaapp/   45 pruebas unitarias
-```
-
-## Integración de la lógica de semanas anteriores
-
-| Semanas 1–3 (consola) | En Android |
-|---|---|
-| Paquetes `modelo`, `servicio`, `datos`, `utils` | Se mantienen sin cambios de lógica, ahora bajo `com.example.pizzeriaapp.*` |
-| Capa `ui` de consola (`println`/`readLine`) | Reemplazada por `ui/PantallaPizzeria.kt` (Jetpack Compose); la consola no existe en Android |
-| Menú numerado | Tarjetas por producto con botones − / + (cantidad dentro de 1..100) |
-| Ingreso de cliente con Regex | Campos de texto que validan correo y teléfono mientras se escribe y muestran el teléfono formateado `+56 (XXX) XXX-XXX` |
-| Cálculo del pedido | Resumen en vivo: subtotal, promoción `@Promocionable` (leída con reflection), descuento por volumen, IVA y total |
-| Verificación de stock, despacho y entrega | Botón **Confirmar pedido**: verifica stock y repartidor antes de modificar nada, asigna repartidor por zona y distancia, muestra el seguimiento de estados y el botón **Registrar entrega** |
-| Formato de montos | `utils/Formato.kt`, separado de la presentación |
-| Flujo del pedido en `main()` | `Pizzeria.confirmarPedido()` y `procesarPedido()`: la pantalla solo muestra resultados |
-
-El texto de bienvenida está en `res/values/strings.xml` y lo muestra la función `Greeting` de `MainActivity.kt` (también visible en la vista previa `GreetingPreview`).
-
-## Retroalimentación de la semana 3 aplicada
-
-| Observación | Cambio | Prueba |
+| # | Supuesto | Implementación |
 |---|---|---|
-| El correo admitía puntos iniciales, finales o seguidos y guiones en los extremos del dominio | La Regex arma el usuario y el dominio por segmentos: sin punto al inicio, al final ni dos seguidos; cada segmento del dominio empieza y termina en letra o número (`utils/Validaciones.kt`) | `correos limite con puntos o guiones en los extremos se rechazan`, `correos limite validos se aceptan` |
-| Una `PizzaEspecial` se agrupaba con una `Pizza` homónima | `Producto.equals()`/`hashCode()` consideran también la clase concreta: cada una conserva su precio y su promoción en el detalle del pedido | `pizza y pizza especial homonimas son productos distintos` |
-| Al reutilizar un cliente quedaban sus datos de contacto anteriores | Criterio explícito en `Cliente.actualizarContacto()`: nombre y correo identifican al cliente; teléfono, dirección y zona se reemplazan por los del pedido nuevo. La pantalla informa qué campos se actualizaron | `cliente registrado con datos nuevos actualiza telefono direccion y zona` |
-| El despacho podía cambiar stock o estados y luego fallar | `Pizzeria.procesarPedido()` verifica stock **y** repartidor antes de modificar algo; si falta cualquiera, el inventario y el estado no cambian y la pantalla muestra el motivo real con la opción de reintentar | `despacho fallido sin repartidor no modifica stock ni estado`, `un pedido ya despachado no se vuelve a procesar` |
-| EOF devolvía correo y teléfono de relleno | Se eliminaron los valores de relleno (`CORREO_POR_DEFECTO`, `TELEFONO_POR_DEFECTO`, `ZONA_POR_DEFECTO`). En Android no hay entrada estándar: los datos vienen de campos de texto y **Confirmar pedido** queda deshabilitado hasta que todos son válidos | — |
-| Una zona inválida se reemplazaba en silencio por Centro | `validarZona()` devuelve `null` para que quien llama informe y pida otra; en la app la zona se elige entre las zonas con cobertura | `zona invalida no se reemplaza en silencio por otra` |
+| S1 | **Total de clientes registrados:** cantidad de dueños distintos. Dos registros con el mismo nombre y correo (sin importar mayúsculas) cuentan como un solo cliente. | `Veterinaria.registrarCliente` reutiliza el cliente existente y actualiza su teléfono y dirección. |
+| S2 | **Pedidos incluidos en el total:** los 3 pedidos de ejemplo de la jornada (dos de Juan Pérez y uno de María López) se cuentan como pedidos realizados. Se cargan como ya despachados, sin volver a descontar stock. | `DatosIniciales` y `Veterinaria.registrarPedidoPrevio`. |
+| S3 | **Último cliente:** el último cliente **nuevo** registrado. Reutilizar un cliente existente no lo convierte en el último. Con los datos de ejemplo, el último es María López. | `Veterinaria.ultimoClienteNuevo`. |
+| S4 | **Pedido realizado:** un pedido cuenta solo cuando queda **despachado**, es decir, cuando hay stock de todos sus productos. Si falta stock, el pedido queda pendiente: no descuenta inventario, no suma al total y la pantalla informa qué producto falta. El cliente sí queda registrado, como en la semana 4. | `Veterinaria.confirmarPedido`, `EstadoPedido`. |
 
-## Pruebas
+Además, el IVA es del 19 % sobre el subtotal, redondeado al peso.
 
-45 pruebas unitarias con `kotlin.test` (JUnit 4): las de la semana 3 adaptadas al nuevo paquete, más las del flujo `confirmarPedido` / `procesarPedido` (reponer stock y reintentar, despacho sin repartidor, pedido ya despachado), la actualización de clientes, los correos límite, los productos homónimos y el formato de montos. Todas pasan con `gradlew testDebugUnitTest`.
+## 3. Arquitectura modular
 
-## Evidencias
+```
+PizzeriaApp/
+├── app/          Entrada: MainActivity, recurso de bienvenida
+├── ui/           Pantalla Compose (PantallaVeterinaria) y VeterinariaViewModel, tema
+├── datos/        Dominio: modelo (Cliente, Mascota, Producto, Pedido, Consulta…), servicio Veterinaria, DatosIniciales
+└── utilidades/   Funciones generales: validaciones, formato de montos, Resultado (manejo de errores)
+```
 
-| Archivo | Muestra |
+**Dependencias:** `app → ui → datos → utilidades` y `ui → utilidades`. No hay ciclos.
+
+**Decisión de diseño:** en la semana 4, `utils` dependía de `modelo` (cálculos y reflexión sobre `Producto`) y `modelo` dependía de `utils`. Eso impedía separar `utilidades` en un módulo propio. En esta entrega, `utilidades` solo contiene funciones sin dependencias del dominio, y la lógica que depende del dominio vive en `datos`.
+
+**Estado:** la `Veterinaria` vive en `VeterinariaViewModel`, no en `remember`, por lo que sobrevive a la rotación de pantalla. La UI observa un `LiveData<EstadoVeterinaria>`.
+
+## 4. Gradle
+
+- `settings.gradle.kts` declara `:app`, `:ui`, `:datos` y `:utilidades`.
+- `gradle/libs.versions.toml` agrega: ViewModel de Compose, LiveData, `runtime-livedata` de Compose y Kotlin Coroutines.
+- Compose se gestiona con el BOM, por lo que no se fijan versiones individuales de Compose.
+
+## 5. Pruebas
+
+Ejecutar desde la raíz del proyecto:
+
+```
+gradlew testDebugUnitTest
+```
+
+| Módulo | Archivo | Pruebas | Resultado |
+|---|---|---|---|
+| utilidades | `FormatoTest` | 1 | Pasan |
+| utilidades | `ValidacionesTest` | 5 | Pasan |
+| datos | `VeterinariaTest` | 13 | Pasan |
+| **Total** | | **19** | **Pasan** |
+
+Las pruebas de `VeterinariaTest` cubren los supuestos S1 a S4, el registro y la actualización de clientes, el registro de mascotas y consultas, el despacho con y sin stock, y el cálculo del IVA.
+
+**Compilación:** `gradlew assembleDebug` genera `app-debug.apk` sin errores.
+
+**Pendiente de verificar:** la ejecución en el emulador (sección 8).
+
+## 6. Cumplimiento de la actividad
+
+| Requisito | Dónde se cumple |
 |---|---|
-| `evidencias/01_android_studio.png` | Android Studio instalado (versión) y SDK Manager con plataforma, emulador y herramientas |
-| `evidencias/02_nuevo_proyecto.png` | Asistente *Empty Activity*: nombre, paquete, ubicación, lista de SDK mínimo y `minSdk` del proyecto |
-| `evidencias/03_avd.png` | AVD Pixel 4 creado en Device Manager y emulador en funcionamiento |
-| `evidencias/04_app_bienvenida.png` | La app en el emulador con el mensaje de bienvenida |
-| `evidencias/05_pedido.png` | Pedido confirmado en el emulador: totales, verificación de stock, repartidor y entrega |
-| `evidencias/06_pruebas.png` | Resultado de las pruebas unitarias |
+| Paso 1 · Módulos datos, UI y utilidades | Sección 3 |
+| Paso 2 · Gradle con Compose, ViewModel, LiveData y Coroutines | `gradle/libs.versions.toml`, `ui/build.gradle.kts`, `VeterinariaViewModel` |
+| Paso 3 · Pantalla inicial con Compose | `ui/PantallaVeterinaria.kt` |
+| Paso 4 · MainActivity conecta lógica y UI | `app/MainActivity.kt` |
+| Paso 5 · Resumen con clientes, pedidos y último cliente | Bloque "Resumen" de la pantalla; reglas en sección 2 |
+| Paso 6 · Pruebas en AVD | Sección 8 (E3 y E4) |
+| Paso 7 · Entrega con capturas | Sección 8 |
 
-![Android Studio instalado](evidencias/01_android_studio.png)
-![Nuevo proyecto](evidencias/02_nuevo_proyecto.png)
-![AVD en funcionamiento](evidencias/03_avd.png)
-![App con mensaje de bienvenida](evidencias/04_app_bienvenida.png)
-![Pedido confirmado](evidencias/05_pedido.png)
-![Pruebas unitarias](evidencias/06_pruebas.png)
+**Mascotas, dueños y consultas:** la pantalla muestra las listas de dueños, mascotas y consultas. Cada mascota tiene un botón "Registrar consulta", que agrega una consulta y actualiza la lista.
+
+## 7. Limitaciones conocidas
+
+- Los datos viven en memoria: al cerrar la app se pierden. No hay base de datos.
+- Las operaciones de la veterinaria son síncronas y en memoria. Las Coroutines se usan para lanzar las acciones desde el ViewModel; no hay trabajo en segundo plano real.
+- No hay pruebas instrumentadas (`androidTest`) del flujo de pantalla.
+- La cantidad máxima por producto en la pantalla es 10.
+
+## 8. Evidencias
+
+Las capturas se guardan en `evidencias/`. Todavía no están tomadas.
+
+| # | Archivo | Qué debe mostrar |
+|---|---|---|
+| E1 | `evidencias/E1_estructura_modular.png` | Project view de Android Studio con los cuatro módulos y `settings.gradle.kts` |
+| E2 | `evidencias/E2_gradle_sync.png` | Sincronización de Gradle sin errores |
+| E3 | `evidencias/E3_estado_inicial.png` | Pantalla en el emulador con el resumen inicial: 2 clientes, 3 pedidos, último cliente María López |
+| E4 | `evidencias/E4_resumen_actualizado.png` | Después de registrar un cliente nuevo y un pedido despachado: los contadores cambian sin reiniciar la app |
+| E5 | `evidencias/E5_pruebas.png` | `gradlew testDebugUnitTest` con 19 pruebas en verde |
+| E6 | `evidencias/E6_mascotas_duenos_consultas.png` | Listas de dueños, mascotas y consultas en la pantalla, con una consulta registrada |
+
+## 9. Retroalimentación docente
+
+La retroalimentación docente de la semana 4 aún no se ha recibido. Si cambia algo de la base técnica, se incorporará en una revisión posterior de esta entrega.

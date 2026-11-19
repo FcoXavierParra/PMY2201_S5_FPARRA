@@ -30,7 +30,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-        // java.time (LocalDate) existe desde API 26; el desugaring lo habilita en API 23-25
         isCoreLibraryDesugaringEnabled = true
     }
     buildFeatures {
@@ -39,6 +38,8 @@ android {
 }
 
 dependencies {
+    // Módulo de UI: pantallas Compose y ViewModel
+    implementation(project(":ui"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -47,11 +48,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    // Lectura de @Promocionable y descripción de clases (reflection), igual que en semanas anteriores
-    implementation(libs.kotlin.reflect)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -23,4 +23,9 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "PizzeriaApp"
+
+// app: punto de entrada · ui: pantallas Compose y ViewModel · datos: dominio veterinario · utilidades: funciones genéricas
 include(":app")
+include(":ui")
+include(":datos")
+include(":utilidades")
